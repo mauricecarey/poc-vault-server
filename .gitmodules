@@ -1,0 +1,3 @@
+[submodule "salt/imports/docker-formula"]
+	path = salt/imports/docker-formula
+	url = https://mauricecarey@github.com/mauricecarey/docker-formula.git
