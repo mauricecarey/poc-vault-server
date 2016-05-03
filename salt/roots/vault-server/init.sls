@@ -4,6 +4,14 @@ include:
   - docker
   - consul-dnsmasq
 
+/opt/consul:
+  file.directory:
+    - user: root
+    - group: root
+    - dir_mode: 755
+    - file_mode: 644
+    - makedirs: True
+
 /vault/vault.hcl:
   file.managed:
     - source: salt://vault-server/files/vault.hcl
