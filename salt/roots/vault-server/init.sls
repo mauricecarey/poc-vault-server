@@ -31,3 +31,11 @@ include:
     - defaults:
         salt_file: /etc/vault/salt_file
         base_subnet_file: /etc/vault/base_subnet_file
+
+/vault/vault-initial-setup.sh:
+  file.managed:
+    - source: salt://vault-server/files/vault-initial-setup.sh
+    - user: root
+    - group: root
+    - mode: 755
+    - makedirs: True
