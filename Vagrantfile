@@ -56,9 +56,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       if node_data["interfaces"]
         node_data["interfaces"].to_enum.with_index(1).each do |(int_name, int_data), i|
           if "#{int_name}" == "external"
-            vm_config.vm.network "private_network", auto_config: false, ip: "#{int_data['network']}", mac: int_data["mac"].tr(':', '').upcase
+            vm_config.vm.network "private_network", auto_config: int_data["auto_config"], ip: "#{int_data['network']}", mac: int_data["mac"].tr(':', '').upcase
+          elsif "#{int_name}" == "external_dhcp"
+            vm_config.vm.network "private_network", auto_config: int_data["auto_config"], type: "dhcp", mac: int_data["mac"].tr(':', '').upcase
+          elsif "#{int_name}" == "public"
+            vm_config.vm.network "public_network"
           else
-            vm_config.vm.network "private_network", auto_config: false, type: "dhcp", mac: int_data["mac"].tr(':', '').upcase, virtualbox__intnet: "#{int_name}"
+            vm_config.vm.network "private_network", auto_config: int_data["auto_config"], type: "dhcp", mac: int_data["mac"].tr(':', '').upcase, virtualbox__intnet: "#{int_name}"
           end
         end
       end
