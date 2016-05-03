@@ -95,6 +95,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
       end
 
+      if node_data["docker"]
+        vm_config.vm.provision "docker" do |d|
+          node_data["docker"].to_enum.with_index(1).each do |(name, data), i|
+            if data["run"]
+              d.run "#{name}", image: "#{data['image']}", args: "#{data['args']}", cmd: "#{data['command']}"
+            else
+              d.pull_images "#{data['image']}"
+            end
+          end
+        end
+      end
+
       vm_config.vm.provider "virtualbox" do |v|
         v.gui = false
         v.customize ["modifyvm", :id, "--memory", node_data["memory"]] if node_data["memory"]
