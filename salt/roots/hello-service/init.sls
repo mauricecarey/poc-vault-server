@@ -1,5 +1,7 @@
+{% set domain = salt['grains.get']('domain', '').replace('.','_') %}
 {% set interfaces = salt['grains.get']('ip4_interfaces', {'eth1':['127.0.0.1']}) %}
 {% set local_ip = interfaces['eth1'][0] %}
+{% set consul_server_ip = '192.168.50.3' %}
 include:
   - docker
   - consul-dnsmasq
@@ -19,6 +21,24 @@ create-consul-configuration:
     - name: /etc/consul/consul.json
     - source: salt://hello-service/files/consul.json
     - template: jinja
+    - user: root
+    - group: root
+    - mode: 644
+    - makedirs: True
+
+/etc/consul/consul_server_ip:
+  file.managed:
+    - contents:
+      - {{ consul_server_ip }}
+    - user: root
+    - group: root
+    - mode: 644
+    - makedirs: True
+
+/etc/consul/domain:
+  file.managed:
+    - contents:
+      - {{ domain }}
     - user: root
     - group: root
     - mode: 644
