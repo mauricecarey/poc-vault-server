@@ -1,3 +1,5 @@
+{% set interfaces = salt['grains.get']('ip4_interfaces', {'eth1':['127.0.0.1']}) %}
+{% set local_ip = interfaces['eth1'][0] %}
 include:
   - docker
   - consul-dnsmasq
@@ -21,3 +23,28 @@ create-consul-configuration:
     - mode: 644
     - makedirs: True
 
+consul-template-config:
+  file.managed:
+    - name: /consul-template/consul-template.cfg
+    - source: salt://hello-service/files/consul-template.cfg
+    - template: jinja
+    - mode: 644
+    - makedirs: True
+    - defaults:
+        local_ip: {{ local_ip }}
+        vault_url: http://consul.service.consul:8200
+        container_name: hello-world
+
+docker-restart-script:
+  file.managed:
+    - name: /consul-template/docker-restart.sh
+    - source: salt://hello-service/files/docker-restart.sh
+    - mode: 755
+    - makedirs: True
+
+postgres-properties-template:
+  file.managed:
+    - name: /consul-template/postgres-properties.ctmpl
+    - source: salt://hello-service/files/postgres-properties.ctmpl
+    - mode: 644
+    - makedirs: True

@@ -1,0 +1,4 @@
+{{with $secret := secret "hello-db/creds/readwrite" }}
+hello.db.username={{ $secret.Data.username }}
+hello.db.password={{ $secret.Data.password }}
+{{end}}
