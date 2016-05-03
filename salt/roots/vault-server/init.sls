@@ -1,6 +1,19 @@
+{% set interfaces = salt['grains.get']('ip4_interfaces', {'eth1':['127.0.0.1']}) %}
+{% set local_ip = interfaces['eth1'][0] %}
 include:
   - docker
   - consul-dnsmasq
+
+/vault/vault.hcl:
+  file.managed:
+    - source: salt://vault-server/files/vault.hcl
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: 644
+    - makedirs: True
+    - defaults:
+        local_ip: {{ local_ip }}
 
 /etc/vault/salt_file:
   file.managed:
