@@ -76,8 +76,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
 
       if node_data["avahi"]
-        config.vm.network "public_network"
-        config.vm.provision "shell", inline: <<-SHELL
+        vm_config.vm.provision "shell", inline: <<-SHELL
           apt-get install -yq avahi-daemon
         SHELL
       end
