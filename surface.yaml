@@ -5,30 +5,89 @@ persistent-storage-enabled: false
 machines:
   vault:
     cpus: 1
-    memory: 1024
+    memory: 512
     avahi: true
+    interfaces:
+      external:
+        auto_config: true
+        mac: 00006C1a0e2c
+        network: 192.168.50.3
+      external_dhcp:
+        auto_config: true
+        mac: 00006C1a0e2b
     salt:
       run-highstate: true
       minion-config: ./vault-minion.conf
       local-salt-path: ./salt
       server-salt-path: /srv/salt/
+    docker:
+      consul-server:
+        image: progrium/consul
+        run: true
+        args: "-p 8300:8300 -p 8301:8301 -p 8301:8301/udp -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 -p 5300:53/udp --dns $(cat /etc/consul/local_ip) -v /opt/consul:/data"
+        command: "-server -bootstrap -dc $(cat /etc/consul/domain) -advertise $(cat /etc/consul/local_ip) -ui-dir /ui"
+      vault-server:
+        image: cgswong/vault
+        run: true
+        args: "-p 0.0.0.0:8200:8200 --dns $(cat /etc/consul/local_ip) -v /vault:/vault --cap-add IPC_LOCK"
+        command: "server -config /vault/vault.hcl"
 
-  service1:
+  db:
     cpus: 1
-    memory: 2048
+    memory: 1024
     avahi: true
+    interfaces:
+      external_dhcp:
+        auto_config: true
+        mac: 00006C1a0e2d
     salt:
       run-highstate: true
       minion-config: ./service-minion.conf
       local-salt-path: ./salt
       server-salt-path: /srv/salt/
+    docker:
+      consul-agent:
+        image: progrium/consul
+        run: true
+        args: "-p 8301:8301 -p 8301:8301/udp -p 8400:8400 -p 8500:8500 -p 5300:53/udp -v /opt/consul:/data -v /var/run/docker.sock:/var/run/docker.sock -v /etc/consul:/etc/consul"
+        command: "-join $(cat /etc/consul/consul_server_ip) -advertise $(cat /etc/consul/local_ip) -dc $(cat /etc/consul/domain) -config-file /etc/consul/consul.json"
+      consul-registrator:
+        image: gliderlabs/registrator:latest
+        run: true
+        args: "-v /var/run/docker.sock:/tmp/docker.sock"
+        command: "-ip $(cat /etc/consul/local_ip) consul://$(cat /etc/consul/local_ip):8500"
+      postgres:
+        image: postgres:9.4
+        run: true
+        args: "-p 5432:5432 -e POSTGRES_USER=vault -e POSTGRES_DB=hello -e POSTGRES_PASSWORD=Passw0rd"
+      redis:
+        image: redis:3
+        run: true
+        args: "-p 6379:6379"
 
-  service2:
+  service:
     cpus: 1
-    memory: 2048
+    memory: 1024
     avahi: true
+    interfaces:
+      external_dhcp:
+        auto_config: true
+        mac: 00006C1a0e2e
     salt:
       run-highstate: true
       minion-config: ./service-minion.conf
       local-salt-path: ./salt
       server-salt-path: /srv/salt/
+    docker:
+      consul-agent:
+        image: progrium/consul
+        run: true
+        args: "-p 8301:8301 -p 8301:8301/udp -p 8400:8400 -p 8500:8500 -p 5300:53/udp -v /opt/consul:/data -v /var/run/docker.sock:/var/run/docker.sock -v /etc/consul:/etc/consul"
+        command: "-join $(cat /etc/consul/consul_server_ip) -advertise $(cat /etc/consul/local_ip) -dc $(cat /etc/consul/domain) -config-file /etc/consul/consul.json"
+      consul-registrator:
+        image: gliderlabs/registrator:latest
+        run: true
+        args: "-v /var/run/docker.sock:/tmp/docker.sock"
+        command: "-ip $(cat /etc/consul/local_ip) consul://$(cat /etc/consul/local_ip):8500"
+      hello-world:
+        image: mmcarey/microservice-hello-world
