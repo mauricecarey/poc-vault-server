@@ -8,7 +8,7 @@ To run this project you'll need Git, Vagrant, and Virtualbox installed on your s
 
 1. Clone the project:
 
-        git clone https://github.com/mauricecarey/poc-vault-server.git
+        git clone --recursive https://github.com/mauricecarey/poc-vault-server.git
 
 2. Open a new terminal and execute the following to start the vault and database machines, and begin initial configuration:
 
