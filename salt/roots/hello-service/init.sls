@@ -3,6 +3,7 @@
 include:
   - docker
   - consul-dnsmasq
+  - consul-template
 
 create-consul-data-directory:
   file.directory:
@@ -18,6 +19,24 @@ create-consul-configuration:
     - name: /etc/consul/consul.json
     - source: salt://hello-service/files/consul.json
     - template: jinja
+    - user: root
+    - group: root
+    - mode: 644
+    - makedirs: True
+
+/etc/consul/local_ip:
+  file.managed:
+    - contents:
+      - {{ local_ip }}
+    - user: root
+    - group: root
+    - mode: 644
+    - makedirs: True
+
+/etc/vault/salt_file:
+  file.managed:
+    - contents:
+      - some random value
     - user: root
     - group: root
     - mode: 644
@@ -48,3 +67,15 @@ postgres-properties-template:
     - source: salt://hello-service/files/postgres-properties.ctmpl
     - mode: 644
     - makedirs: True
+
+consul-template-start-script:
+  file.managed:
+    - name: /consul-template/start-consul-template.sh
+    - source: salt://hello-service/files/start-consul-template.sh
+    - template: jinja
+    - mode: 755
+    - makedirs: True
+    - defaults:
+        local_ip_file: /etc/consul/local_ip
+        salt_file: /etc/vault/salt_file
+        vault_url: http://consul.service.consul:8200
