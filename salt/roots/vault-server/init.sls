@@ -1,3 +1,4 @@
+{% set domain = salt['grains.get']('domain', '').replace('.','_') %}
 {% set interfaces = salt['grains.get']('ip4_interfaces', {'eth1':['127.0.0.1']}) %}
 {% set local_ip = interfaces['eth1'][0] %}
 include:
@@ -10,6 +11,24 @@ include:
     - group: root
     - dir_mode: 755
     - file_mode: 644
+    - makedirs: True
+
+/etc/consul/domain:
+  file.managed:
+    - contents:
+      - {{ domain }}
+    - user: root
+    - group: root
+    - mode: 644
+    - makedirs: True
+
+/etc/consul/local_ip:
+  file.managed:
+    - contents:
+      - {{ local_ip }}
+    - user: root
+    - group: root
+    - mode: 644
     - makedirs: True
 
 /vault/vault.hcl:
