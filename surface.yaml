@@ -27,7 +27,7 @@ machines:
         args: "-p 8300:8300 -p 8301:8301 -p 8301:8301/udp -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 -p 5300:53/udp --dns $(cat /etc/consul/local_ip) -v /opt/consul:/data"
         command: "-server -bootstrap -dc $(cat /etc/consul/domain) -advertise $(cat /etc/consul/local_ip) -ui-dir /ui"
       vault-server:
-        image: cgswong/vault
+        image: cgswong/vault:0.5.2
         run: true
         args: "-p 0.0.0.0:8200:8200 --dns $(cat /etc/consul/local_ip) -v /vault:/vault --cap-add IPC_LOCK"
         command: "server -config /vault/vault.hcl"
@@ -90,4 +90,4 @@ machines:
         args: "-v /var/run/docker.sock:/tmp/docker.sock"
         command: "-ip $(cat /etc/consul/local_ip) consul://$(cat /etc/consul/local_ip):8500"
       hello-world:
-        image: mmcarey/microservice-hello-world
+        image: mmcarey/microservice-hello-world:1.0
